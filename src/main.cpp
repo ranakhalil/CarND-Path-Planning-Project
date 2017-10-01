@@ -19,6 +19,9 @@ using Eigen::VectorXd;
 // for convenience
 using json = nlohmann::json;
 
+// Constants
+const double LANE_WIDTH = 4;
+
 // For converting back and forth between radians and degrees.
 constexpr double pi() { return M_PI; }
 double deg2rad(double x) { return x * pi() / 180; }
@@ -352,13 +355,14 @@ int main() {
 			{
 				// Check if there is a car in my lane
 				float d = sensor_fusion[i][6];
-				if (d < (2 + 4 * lane + 2) && d >(2 + 4 * lane - 2))
+				double vx = sensor_fusion[i][3];
+				double vy = sensor_fusion[i][4];
+				double check_speed = sqrt(vx*vx + vy*vy);
+				double check_car_s = sensor_fusion[i][5];
+
+				// center lane
+				if (d < (2 + LANE_WIDTH * lane + 2) && d >(2 + LANE_WIDTH * lane - 2))
 				{
-					double vx = sensor_fusion[i][3];
-					double vy = sensor_fusion[i][4];
-					double check_speed = sqrt(vx*vx + vy*vy);
-					double check_car_s = sensor_fusion[i][5];
-					
 					check_car_s += ((double)previous_size* 0.02*check_speed);
 
 					if ((check_car_s > car_s) && ((check_car_s - car_s) < 30))
@@ -383,6 +387,18 @@ int main() {
 					else if (reference_velocity < 49.5){
 						reference_velocity += 0.424;
 					}
+				}
+				
+
+				// Left Lane
+				if (d < (2 + LANE_WIDTH * (lane - 1) + 2) && (2 + LANE_WIDTH * (lane - 1) - 2))
+				{
+					
+				}
+
+				// right lane
+				if (d < (2 + LANE_WIDTH * (lane + 1) + 2) && d > (2 + LANE_WIDTH * (lane + 1) - 2))
+				{
 				}
 			}
 
@@ -426,9 +442,9 @@ int main() {
 			}
 
 			// In frenet let's add evenly 30 m spaced points ahead
-			vector<double> next_wp0 = getXY(car_s + 30, (2 + 4 * lane), map_waypoints_s, map_waypoints_x, map_waypoints_y);
-			vector<double> next_wp1 = getXY(car_s + 60, (2 + 4 * lane), map_waypoints_s, map_waypoints_x, map_waypoints_y);
-			vector<double> next_wp2 = getXY(car_s + 90, (2 + 4 * lane), map_waypoints_s, map_waypoints_x, map_waypoints_y);
+			vector<double> next_wp0 = getXY(car_s + 30, (2 + LANE_WIDTH * lane), map_waypoints_s, map_waypoints_x, map_waypoints_y);
+			vector<double> next_wp1 = getXY(car_s + 60, (2 + LANE_WIDTH * lane), map_waypoints_s, map_waypoints_x, map_waypoints_y);
+			vector<double> next_wp2 = getXY(car_s + 90, (2 + LANE_WIDTH * lane), map_waypoints_s, map_waypoints_x, map_waypoints_y);
 
 			ptsx.push_back(next_wp0[0]);
 			ptsx.push_back(next_wp1[0]);
